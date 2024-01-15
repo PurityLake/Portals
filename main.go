@@ -2,6 +2,7 @@
 package main
 
 import (
+	"fmt"
 	"reflect"
 
 	"github.com/portals/v2/ecs"
@@ -23,10 +24,6 @@ func (p Position) Data() ecs.ComponentData {
 	return p
 }
 
-func (p Position) IsA(value interface{}) bool {
-	return ecs.CheckComponent[Position](value)
-}
-
 func (p Position) Type() reflect.Type {
 	return reflect.TypeOf(p)
 }
@@ -45,31 +42,32 @@ func (r Renderable) Data() ecs.ComponentData {
 	return r
 }
 
-func (r Renderable) IsA(value interface{}) bool {
-	return ecs.CheckComponent[Renderable](value)
-}
-
 func (r Renderable) Type() reflect.Type {
 	return reflect.TypeOf(r)
 }
 
 func main() {
+	system := ecs.System{}
 	position := ecs.Component(Position{0, 0})
+	position2 := ecs.Component(Position{0, 0})
 	renderable := ecs.Component(Renderable{nil})
 
-	entity := ecs.NewEntity("player", &position, &renderable)
+	entity := ecs.NewEntity("player", position, renderable)
+	entity2 := ecs.NewEntity("test", position2)
+	system.AddEntity(entity)
+	system.AddEntity(entity2)
+	entities, components := system.QueryWithEntity(Position{}.Type(), Renderable{}.Type())
 
-	if entity.HasComponents(Position{}.Type(), Renderable{}.Type()) {
-		println("Has Position and Renderable")
-	}
-
-	for _, component := range entity.Components() {
-		comp := *component
-		switch comp.(type) {
-		case Position:
-			println("Position")
-		case Renderable:
-			println("Renderable")
+	for i, entity := range entities {
+		fmt.Println(entity.Name())
+		componentList := components[i]
+		for _, component := range componentList {
+			if ecs.ComponentIsA[Position](component) {
+				fmt.Println("Position")
+			}
+			if ecs.ComponentIsA[Renderable](component) {
+				fmt.Println("Renderable")
+			}
 		}
 	}
 

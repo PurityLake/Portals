@@ -6,22 +6,22 @@ import (
 
 type Entity struct {
 	name       string
-	components []*Component
+	components []Component
 }
 
-func NewEntity(name string, components ...*Component) *Entity {
-	return &Entity{name, components}
+func NewEntity(name string, components ...Component) Entity {
+	return Entity{name, components}
 }
 
 func (e Entity) Name() string {
 	return e.name
 }
 
-func (e *Entity) AddComponent(component *Component) {
+func (e *Entity) AddComponent(component Component) {
 	e.components = append(e.components, component)
 }
 
-func (e Entity) Components() []*Component {
+func (e Entity) Components() []Component {
 	return e.components
 }
 
@@ -33,7 +33,7 @@ func (e Entity) HasComponents(types ...reflect.Type) bool {
 	}
 	for _, component := range e.components {
 		for _, t := range types {
-			if (*component).Type() == t {
+			if (component).Type() == t {
 				numTypes--
 				break
 			}
