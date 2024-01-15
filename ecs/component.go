@@ -18,8 +18,6 @@ func ComponentTypeIsA(a Component, t reflect.Type) bool {
 }
 
 func ComponentIsA[T Component](a interface{}) bool {
-	if _, ok := a.(T); ok {
-		return true
-	}
-	return false
+	_, ok := a.(T)
+	return ok
 }
