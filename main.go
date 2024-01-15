@@ -3,70 +3,33 @@ package main
 
 import (
 	"fmt"
-	"reflect"
 
-	"github.com/portals/v2/ecs"
+	ecs "github.com/PurityLake/go-ecs"
+	"github.com/portals/v2/systems"
 	"github.com/veandco/go-sdl2/sdl"
 	"github.com/veandco/go-sdl2/ttf"
 )
 
-type Position struct {
-	x, y int
-}
-
-func (p Position) Name() string {
-	return "position"
-}
-
-func (p Position) Update() {}
-
-func (p Position) Data() ecs.ComponentData {
-	return p
-}
-
-func (p Position) Type() reflect.Type {
-	return reflect.TypeOf(p)
-}
-
-type Renderable struct {
-	texture *sdl.Texture
-}
-
-func (r Renderable) Name() string {
-	return "renderable"
-}
-
-func (r Renderable) Update() {}
-
-func (r Renderable) Data() ecs.ComponentData {
-	return r
-}
-
-func (r Renderable) Type() reflect.Type {
-	return reflect.TypeOf(r)
-}
-
 func main() {
-	system := ecs.System{}
-	position := ecs.Component(Position{0, 0})
-	position2 := ecs.Component(Position{0, 0})
-	renderable := ecs.Component(Renderable{nil})
+	world := ecs.World{}
+	world.AddSystem(systems.ExampleSystem{})
+	world.Start()
 
-	entity := ecs.NewEntity("player", position, renderable)
-	entity2 := ecs.NewEntity("test", position2)
-	system.AddEntity(entity)
-	system.AddEntity(entity2)
-	entities, components := system.QueryWithEntity(Position{}.Type(), Renderable{}.Type())
-
-	for i, entity := range entities {
-		fmt.Println(entity.Name())
-		componentList := components[i]
-		for _, component := range componentList {
-			if ecs.ComponentIsA[Position](component) {
-				fmt.Println("Position")
+	comps, found := world.Query(systems.Renderable{}.Type())
+	if found {
+		for _, compList := range comps {
+			for _, comp := range compList {
+				fmt.Println("Component: ", comp.Name())
 			}
-			if ecs.ComponentIsA[Renderable](component) {
-				fmt.Println("Renderable")
+		}
+	}
+
+	entities, comps, found := world.QueryWithEntity(systems.Renderable{}.Type())
+	if found {
+		for i, e := range entities {
+			fmt.Println("Entity: ", e.Name())
+			for _, comp := range comps[i] {
+				fmt.Println("Component: ", comp.Name())
 			}
 		}
 	}
