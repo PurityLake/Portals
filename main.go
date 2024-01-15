@@ -2,8 +2,6 @@
 package main
 
 import (
-	"fmt"
-
 	ecs "github.com/PurityLake/go-ecs"
 	"github.com/portals/v2/systems"
 	"github.com/veandco/go-sdl2/sdl"
@@ -14,25 +12,6 @@ func main() {
 	world := ecs.World{}
 	world.AddSystem(systems.ExampleSystem{})
 	world.Start()
-
-	comps, found := world.Query(systems.Renderable{}.Type())
-	if found {
-		for _, compList := range comps {
-			for _, comp := range compList {
-				fmt.Println("Component: ", comp.Name())
-			}
-		}
-	}
-
-	entities, comps, found := world.QueryWithEntity(systems.Renderable{}.Type())
-	if found {
-		for i, e := range entities {
-			fmt.Println("Entity: ", e.Name())
-			for _, comp := range comps[i] {
-				fmt.Println("Component: ", comp.Name())
-			}
-		}
-	}
 
 	if err := sdl.Init(sdl.INIT_EVERYTHING); err != nil {
 		panic(err)

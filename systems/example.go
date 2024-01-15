@@ -10,7 +10,7 @@ import (
 
 type Position struct {
 	id   int
-	x, y int
+	X, Y int
 }
 
 func (p Position) Id() int {
@@ -54,7 +54,9 @@ func (r Renderable) Type() reflect.Type {
 	return reflect.TypeOf(r)
 }
 
-type ExampleSystem struct{}
+type ExampleSystem struct {
+	// data can go here
+}
 
 func (s ExampleSystem) Setup(world *ecs.World) {
 	fmt.Println("ExampleSystem setup")
