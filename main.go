@@ -3,6 +3,8 @@ package main
 
 import (
 	ecs "github.com/PurityLake/go-ecs"
+	// "github.com/portals/v2/mapgen"
+	"github.com/portals/v2/render"
 	"github.com/portals/v2/systems"
 	"github.com/veandco/go-sdl2/sdl"
 	"github.com/veandco/go-sdl2/ttf"
@@ -10,37 +12,38 @@ import (
 
 func main() {
 	world := ecs.World{}
-	world.AddSystem(systems.ExampleSystem{})
-	world.Start()
 
-	if err := sdl.Init(sdl.INIT_EVERYTHING); err != nil {
-		panic(err)
-	}
-	defer sdl.Quit()
-
-	window, err := sdl.CreateWindow("Portals", sdl.WINDOWPOS_UNDEFINED, sdl.WINDOWPOS_UNDEFINED,
-		800, 600, sdl.WINDOW_SHOWN)
+	window := render.NewWindow("Portals", 800, 600)
+	err := window.Init()
 	if err != nil {
 		panic(err)
 	}
-	defer window.Destroy()
 
-	renderer, err := sdl.CreateRenderer(window, -1, sdl.RENDERER_ACCELERATED|sdl.RENDERER_PRESENTVSYNC)
+	renderer, err := window.CreateRenderer()
 	if err != nil {
 		panic(err)
 	}
-	defer renderer.Destroy()
 
 	if err := ttf.Init(); err != nil {
 		panic(err)
 	}
-	defer ttf.Quit()
 
 	font, err := ttf.OpenFont("assets/fonts/square.ttf", 20)
 	if err != nil {
 		panic(err)
 	}
-	defer font.Close()
+
+	surface, err := font.RenderUTF8Blended("@", sdl.Color{R: 255, G: 255, B: 255, A: 255})
+	if err != nil {
+		panic(err)
+	}
+
+	texture, err := renderer.CreateTextureFromSurface(surface)
+	if err != nil {
+		panic(err)
+	}
+
+	world.AddEntity("player", systems.Renderable{Texture: texture}, systems.Position{X: 100, Y: 100})
 
 	running := true
 	dirty := true
@@ -48,6 +51,14 @@ func main() {
 		if dirty {
 			renderer.SetDrawColor(0, 0, 0, 255)
 			renderer.Clear()
+			components, found := world.Query(systems.Renderable{}.Type(), systems.Position{}.Type())
+			if found {
+				for _, componentList := range components {
+					position := componentList[1].(systems.Position)
+					renderable := componentList[0].(systems.Renderable)
+					renderer.Copy(renderable.Texture, nil, &sdl.Rect{X: int32(position.X), Y: int32(position.Y), W: 20, H: 20})
+				}
+			}
 			renderer.Present()
 			dirty = false
 		}
