@@ -4,8 +4,9 @@ package main
 import (
 	ecs "github.com/PurityLake/go-ecs"
 	// "github.com/portals/v2/mapgen"
+	"github.com/portals/v2/components"
 	"github.com/portals/v2/render"
-	"github.com/portals/v2/systems"
+	// "github.com/portals/v2/systems"
 	"github.com/veandco/go-sdl2/sdl"
 	"github.com/veandco/go-sdl2/ttf"
 )
@@ -43,7 +44,7 @@ func main() {
 		panic(err)
 	}
 
-	world.AddEntity("player", systems.Renderable{Texture: texture}, systems.Position{X: 100, Y: 100})
+	world.AddEntity("player", components.Renderable{Texture: texture, W: 20, H: 20}, components.Position{X: 100, Y: 100})
 
 	running := true
 	dirty := true
@@ -51,12 +52,18 @@ func main() {
 		if dirty {
 			renderer.SetDrawColor(0, 0, 0, 255)
 			renderer.Clear()
-			components, found := world.Query(systems.Renderable{}.Type(), systems.Position{}.Type())
+			componentsFound, found := world.Query(components.Renderable{}.Type(), components.Position{}.Type())
 			if found {
-				for _, componentList := range components {
-					position := componentList[1].(systems.Position)
-					renderable := componentList[0].(systems.Renderable)
-					renderer.Copy(renderable.Texture, nil, &sdl.Rect{X: int32(position.X), Y: int32(position.Y), W: 20, H: 20})
+				for _, componentList := range componentsFound {
+					position := componentList[1].(components.Position)
+					renderable := componentList[0].(components.Renderable)
+					renderer.Copy(renderable.Texture, nil,
+						&sdl.Rect{
+							X: int32(position.X),
+							Y: int32(position.Y),
+							W: int32(renderable.W),
+							H: int32(renderable.H),
+						})
 				}
 			}
 			renderer.Present()

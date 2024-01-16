@@ -9,6 +9,7 @@ import (
 
 type Renderable struct {
 	id      int
+	W, H    int
 	Texture *sdl.Texture
 }
 
