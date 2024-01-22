@@ -48,11 +48,12 @@ func main() {
 
 	running := true
 	dirty := true
+	query := ecs.NewQuery(ecs.Type[components.Renderable](), ecs.Type[components.Position]())
 	for running {
 		if dirty {
 			renderer.SetDrawColor(0, 0, 0, 255)
 			renderer.Clear()
-			componentsFound, found := world.Query(components.Renderable{}.Type(), components.Position{}.Type())
+			componentsFound, found := world.Query(query)
 			if found {
 				for _, componentList := range componentsFound {
 					position := componentList[1].(components.Position)
