@@ -3,18 +3,18 @@ package components
 import (
 	"reflect"
 
-	"github.com/PurityLake/go-ecs"
+	ecs "github.com/PurityLake/go-ecs"
 	"github.com/veandco/go-sdl2/sdl"
 )
 
 type Renderable struct {
-	id      int
+	ID      int
 	W, H    int
 	Texture *sdl.Texture
 }
 
 func (r Renderable) Id() int {
-	return r.id
+	return r.ID
 }
 
 func (r Renderable) Name() string {

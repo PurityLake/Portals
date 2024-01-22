@@ -3,16 +3,16 @@ package components
 import (
 	"reflect"
 
-	"github.com/PurityLake/go-ecs"
+	ecs "github.com/PurityLake/go-ecs"
 )
 
 type Position struct {
-	id   int
+	ID   int
 	X, Y int
 }
 
 func (p Position) Id() int {
-	return p.id
+	return p.ID
 }
 
 func (p Position) Name() string {
