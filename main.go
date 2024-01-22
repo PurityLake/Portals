@@ -2,7 +2,6 @@
 package main
 
 import (
-	"fmt"
 	"log"
 
 	ecs "github.com/PurityLake/go-ecs"
@@ -16,12 +15,14 @@ import (
 )
 
 var (
-	UpPressed    bool = false
-	UpReleased   bool = true
-	DownPressed  bool = false
-	DownReleased bool = true
-	LeftPressed  bool = false
-	RightPressed bool = false
+	UpPressed     bool = false
+	UpReleased    bool = true
+	DownPressed   bool = false
+	DownReleased  bool = true
+	LeftPressed   bool = false
+	LeftReleased  bool = true
+	RightPressed  bool = false
+	RightReleased bool = true
 )
 
 func main() {
@@ -86,26 +87,35 @@ func main() {
 			renderer.Present()
 			dirty = false
 		}
-		if UpPressed || DownPressed {
-			comps, found := world.QueryMut(playerQuery)
+		if UpPressed || DownPressed || LeftPressed || RightPressed {
+			entities, comps, found := world.QueryWithEntityMut(playerQuery)
 			if found {
-				for _, componentList := range comps {
-					for _, comp := range componentList {
-						position, ok := (comp).(components.Position)
-						if !ok {
-							log.Fatal("Could not cast component to Position")
+				for i, entity := range entities {
+					for _, comp := range comps[i] {
+						c, err := entity.GetComponent(comp)
+						if err != nil {
+							log.Fatal(err)
 						}
-						if UpPressed {
-							fmt.Println("Move up")
-							UpPressed = false
-							position.Y -= 20
+						switch c := (*c).(type) {
+						case components.Position:
+							if UpPressed {
+								UpPressed = false
+								c.Y -= 20
+							}
+							if DownPressed {
+								DownPressed = false
+								c.Y += 20
+							}
+							if LeftPressed {
+								LeftPressed = false
+								c.X -= 20
+							}
+							if RightPressed {
+								RightPressed = false
+								c.X += 20
+							}
 							dirty = true
-						}
-						if DownPressed {
-							fmt.Println("Move down")
-							DownPressed = false
-							position.Y += 20
-							dirty = true
+							entity.SetComponent(comp, c)
 						}
 					}
 				}
@@ -118,28 +128,39 @@ func main() {
 				running = false
 			case *sdl.KeyboardEvent:
 				switch event.Keysym.Sym {
-				case sdl.K_q:
-					println("Quit")
+				case sdl.K_ESCAPE:
 					running = false
 				case sdl.K_w:
 					if event.State == sdl.PRESSED && !UpPressed && UpReleased {
-						fmt.Println("W pressed")
 						UpPressed = true
 						UpReleased = false
 					} else if event.State == sdl.RELEASED {
-						fmt.Println("W released")
 						UpPressed = false
 						UpReleased = true
 					}
 				case sdl.K_s:
 					if event.State == sdl.PRESSED && !DownPressed && DownReleased {
-						fmt.Println("S pressed")
 						DownPressed = true
 						DownReleased = false
 					} else if event.State == sdl.RELEASED {
-						fmt.Println("S release")
 						DownPressed = false
 						DownReleased = true
+					}
+				case sdl.K_a:
+					if event.State == sdl.PRESSED && !LeftPressed {
+						LeftPressed = true
+						LeftReleased = false
+					} else if event.State == sdl.RELEASED {
+						LeftPressed = false
+						LeftReleased = true
+					}
+				case sdl.K_d:
+					if event.State == sdl.PRESSED && !RightPressed {
+						RightPressed = true
+						RightReleased = false
+					} else if event.State == sdl.RELEASED {
+						RightPressed = false
+						RightReleased = true
 					}
 				}
 			}
